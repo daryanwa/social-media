@@ -57,22 +57,7 @@ useEffect(() => {
     , [])
 
 
-    const progressBar = () => {
-        switch(count.current){
-            case 1:
-                return 15;
-            case 2:
-                return 30;
-            case 3:
-                return 45;
-            case 4:
-                return 60;
-            case 4:
-                return 75;
-            default:
-                return 0;
-        }
-    }
+
 
 
   return (
