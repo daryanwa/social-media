@@ -7,6 +7,7 @@ import tik from '../../assets/images/tik.jpg'
 import laptop from '../../assets/images/laptop.jpg'
 import apps from '../../assets/images/apps.jpg'
 import media from '../../assets/images/media.jpg'
+import Timer from './Timer'
 
 
 function LeftSide() {
@@ -103,6 +104,7 @@ useEffect(() => {
             <div>
                 <img src={data.image} className='h-36 rounded-lg'/>
             </div>
+            
         </div>
     </div>
   )

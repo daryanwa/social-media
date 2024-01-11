@@ -20,10 +20,13 @@ function CardSection() {
 
   return (
     <div>
-       
+      
         
 
             <div className=' grid grid-cols-1 gap-1 pt-5 mb-10'>
+                <h1 className='font-roboto text-red-500 pt-5 flex justify-center '>
+                    ОГОЛОШЕННЯ!
+                </h1>
                 {cardData.map((card, index) => {
                 return  <div key={card.id} className='flex flex-col items-center justify-center'>
               

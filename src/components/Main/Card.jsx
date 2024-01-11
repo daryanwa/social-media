@@ -10,7 +10,7 @@ function Card({name,img}) {
             
 
             <div className='relative'>
-                <img src={img} alt={name} className='h-80 w-full rounded-xl hover:scale-105 duration-700 cursor-pointer shadow-lg'/>
+                <img src={img} alt={name} className='h-full w-full rounded-xl cursor-pointer shadow-lg object-cover'/>
             </div>
        
             
