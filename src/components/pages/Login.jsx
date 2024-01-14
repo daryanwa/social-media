@@ -8,17 +8,40 @@ import {
     Checkbox,
     Button,
   } from "@material-tailwind/react";
-   
 import { useFormik } from "formik";
+import { useContext, useEffect } from "react";
 import * as Yup from 'yup'
+import { AuthContext } from "../AppContext/AppContext";
+// import { onAuthStateChanged } from "firebase/auth";
+import {auth, onAuthStateChanged} from '../firebase/firebase'
+import {useNavigate} from 'react-router-dom'
+
 
   export default function Login() {
+
+
+const {signInWithGoogle, loginWithEmailAndPassword} = useContext(AuthContext)
+const navigate = useNavigate()
+
+
+
+useEffect(() => {
+  onAuthStateChanged(auth,(user)=> {
+    if(user) {
+      navigate('/')
+    }else{
+
+    }
+  })
+},[navigate])
 
 
 let initialValues = {
     email: "",
     password: ""
 }
+
+
 
 const validationSchema = Yup.object({
     email: Yup.string().email("Invalid email adress").required("Required"),
@@ -29,9 +52,9 @@ const handleSubmit = (e) => {
     e.preventDefault()
     const {email, password} = formik.values
     if(formik.isValid === true){
-        alert('good')
+        loginWithEmailAndPassword({email, password})
     }else{
-        alert('check input fields')
+        alert('check your input fields')
     }
     console.log('formik', formik)
 }
@@ -45,35 +68,37 @@ const formik = useFormik({initialValues, validationSchema, handleSubmit})
         <CardHeader
           variant="gradient"
           color="gray"
-          className="bg-yellow-500 mb-4 grid h-28 place-items-center"
+          className="bg-yellow-500 mb-10  grid h-28 place-items-center"
           >
           <Typography variant="h3"   color="blue">
             Sign In
           </Typography>
         </CardHeader>
         <CardBody className="flex flex-col gap-4">
-              <form onSubmit={handleSubmit}>
-                <div className="mb-2">
+              <form onSubmit={handleSubmit} className="mx-2">
+                <div className="mb-2 mx-2">
                   <Input
                     name="email"
                     type="email"
-                    placeholder="Password"
+                    placeholder="Email"
+                    className="py-2 px-2 outline-none"
                     size="lg"
                     {...formik.getFieldProps("email")}
                   />
                 </div>
-                <div>
+                <div className="mx-2">
                   {formik.touched.email && formik.errors.email && (
                     <Typography variant="small" color="red">
                       {formik.errors.email}
                     </Typography>
                   )}
                 </div>
-                <div className="mt-4 mb-2">
+                <div className="mt-4 mb-2 mx-2">
                   <Input
                     name="password"
                     type="password"
                     placeholder="Password"
+                    className="py-2 px-2 outline-none "
                     size="lg"
                     {...formik.getFieldProps("password")}
                   />
@@ -87,25 +112,37 @@ const formik = useFormik({initialValues, validationSchema, handleSubmit})
                 </div>
                 <Button
                   variant="gradient"
-                  fullWidth
-                  className="mb-4 bg-yellow-500"
+                  
+                  className="mb-4 px-2 py-5 mx-2 w-[96%] bg-yellow-500"
                   type="submit"
+
                 >
                   Login
                 </Button>
+                <Button
+                  onClick={signInWithGoogle}
+                  variant="gradient"
+                  
+                  className="mb-4 px-2 py-5 mx-2 w-[96%] bg-yellow-500"
+                  type="submit"
+
+                >
+                  Sign in with Google
+                </Button>
+
               </form>
             </CardBody>
         <CardFooter className="pt-0 bg-">
           <Typography variant="small" className="mt-6 flex bg justify-center">
-            Don&apos;t have an account?
+            Problem with account?
             <Typography
               as="a"
-              href="#signup"
+              href="#telegram"
               variant="small"
               color="blue-gray"
               className="ml-1 font-bold"
               >
-              Sign up
+              <a href="tg://resolve?domain=daryanwa">Telegram</a>
             </Typography>
           </Typography>
         </CardFooter>

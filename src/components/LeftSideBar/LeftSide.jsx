@@ -1,4 +1,4 @@
-import React, {useState, useEffect, useRef} from 'react'
+import React, {useState, useEffect, useRef, useContext} from 'react'
 import nature from '../../assets/images/nature.jpg'
 import { Tooltip, Avatar } from '@material-tailwind/react'
 import avatar from '../../assets/images/avatar.jpg'
@@ -8,12 +8,17 @@ import laptop from '../../assets/images/laptop.jpg'
 import apps from '../../assets/images/apps.jpg'
 import media from '../../assets/images/media.jpg'
 import Timer from './Timer'
+import { AuthContext } from '../AppContext/AppContext'
+
 
 
 function LeftSide() {
 
 let [data, setData] = useState([])
+
 const count = useRef(0)
+const {user, userData} = useContext(AuthContext)
+
 
 const handleRandom = (arr) => {
     setData(arr[Math.floor(Math.random() * arr?.length)])
@@ -68,33 +73,34 @@ useEffect(() => {
       
         <div className='absolute -bottom-4'>
             <Tooltip content='Profile' placement='top'>
-                <Avatar src={avatar} className='z-30 w-20 h-20 object-cover rounded-full' size='md' />
+                <Avatar src={userData?.image ? userData?.image : avatar} className='z-30 w-20 h-20 object-cover rounded-full' size='md' />
             </Tooltip>
         </div>
         </div>
         <div className='flex flex-col items-center pt-6'>
             <p className='font-roboto font-medium text-md mb-2 text-gray-700 no-underline tracking-normal leading-none'>
-                User email
+                {user?.email || userData?.email}
             </p>
             <p className='font-roboto font-medium text-md mb-2 text-gray-700 no-underline tracking-normal leading-none'>
-                Name Surname
+                {user?.name || userData?.name}
             </p>
             <p className='font-roboto font-medium text-xl mb-2 text-gray-700 no-underline tracking-normal leading-none'>
-                Parents of 
+                 {userData?.childname ? `Parents of ${userData?.childname}` : ''}
             </p>
             <p className='font-roboto font-medium text-xl mb-2 text-gray-700 no-underline tracking-normal leading-none'>
-                Phone
+                {userData?.phone ? userData?.phone : ' '}
             </p>
         </div>
         <div className='flex flex-col items-center pt-6'>
-            <img src={location} alt='location' />
+            <img src={userData?.adress ? location : ''} alt='None location' />
             <p className='font-roboto font-medium text-xl mb-2 text-gray-700 no-underline tracking-normal leading-none'>
-                Address: 
+                {userData?.adress ? userData?.adress : ' '}
             </p>
         </div>
         <div className='flex flex-col items-center pt-6'>
             <p className='font-roboto font-medium text-xl mb-2 text-gray-700 no-underline tracking-normal leading-none'>
                 Group:
+                {userData?.group ? userData?.group : ' '}
             </p>
         </div>
         <div className='flex flex-col justify-center items-center pt-4'>

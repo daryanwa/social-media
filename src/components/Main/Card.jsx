@@ -9,8 +9,8 @@ function Card({name,img}) {
      
             
 
-            <div className='relative'>
-                <img src={img} alt={name} className='h-full w-full rounded-xl cursor-pointer shadow-lg object-cover'/>
+            <div className='relative justify-center   flex'>
+                <img src={img} alt={name} className='h-[95%] w-[95%]   rounded-xl cursor-pointer shadow-lg object-cover'/>
             </div>
        
             

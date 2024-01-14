@@ -2,6 +2,7 @@ import React from 'react'
 import Home from './Home'
 import {Routes, Route } from 'react-router-dom'
 import Login from './Login'
+// import Register from './Register'
 
 
 function Pages() {
@@ -11,6 +12,8 @@ function Pages() {
         <Routes>
           <Route path='/' element={<Home/>} />
           <Route path='/login' element={<Login />} />
+          {/* <Route path='/register' element={<Register />} /> */}
+        
         </Routes>
       
     </div>

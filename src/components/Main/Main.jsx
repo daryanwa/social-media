@@ -8,13 +8,13 @@ import addImage from '../../assets/images/add-image.png'
 function Main() {
   return (
     <div className='flex flex-col items-center'>
-      <div className='flex flex-col py-4 w-full bg-white rounded-3xl shadow-lg'>
+      <div className='flex flex-col py-4 w-[90%] bg-white rounded-3xl shadow-lg'>
         <div className='flex items-center border-b-2 border-gray-300 pb-4 pl-4 w-full'>
           <Avatar src={avatar} size='sm' className='w-12 h-12' variant='circular' alt='avatar' ></Avatar>
           <form className='w-full'>
             <div className='flex justify-between items-center'>
               <div className='w-full ml-4'>
-                <input placeholder='Write post...' className=' block py-2.5 px-0  text-sm text-gray-900 bg-transparent border-0 border-b-2 border-gray-300 appearance-none dark:text-white dark:border-gray-600 dark:focus:border-blue-500 focus:outline-none focus:ring-0 focus:border-blue-600 peer w-full bg-white rounded-md' type='text' name='text'  />
+                <input placeholder='Write post...' className=' block py-2.5 px-0  text-sm text-gray-900 bg-transparent border-0 border-b-2 border-gray-300 appearance-none  dark:border-gray-600 dark:focus:border-blue-500 focus:outline-none focus:ring-0 focus:border-blue-600 peer w-full bg-white rounded-md' type='text' name='text'  />
               </div>
               <div className='mx-4'>
                 {/* put PreviewImag */}

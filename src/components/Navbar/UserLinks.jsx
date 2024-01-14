@@ -1,8 +1,17 @@
-import React from 'react'
+import React, { useContext } from 'react'
 import { Tooltip, Avatar } from '@material-tailwind/react'
 import avatar from '../../assets/images/avatar.jpg'
+import { AuthContext } from '../AppContext/AppContext'
+
+
+
+
 
 function UserLinks() {
+
+  const {signOutUser, user, userData} = useContext(AuthContext)
+
+
   return (
     <div className='flex w-300 justify-center cursor-pointer flex-row-reverse '>
         <div className='hover:translate-y-1 duration-500  ease-in-out hover:text-blue-500'>
@@ -26,15 +35,15 @@ function UserLinks() {
         </div>
       
 
-        <div className='flex mx-4 items-center'>
+        <div className='flex mx-4 items-center' onClick={signOutUser}>
             
             <Tooltip 
             className='px-2 font-roboto pt-5 text-sm font-medium bg-yellow-500 border-gray-200 border shadow-sm rounded-lg opacity-0  text-black'
             content="Sign out" placement='bottom'>
-                <Avatar src={avatar} size="sm" alt='avatar' className='z-30 w-8 h-8 object-cover rounded-full' />
+                <Avatar src={userData?.image ? userData?.image : avatar} size="sm" alt='avatar' className='z-30 w-8 h-8 object-cover rounded-full' />
             </Tooltip>
             <p className='ml-4 font-roboto text-sm text-black font-medium no-underline'>
-                User
+                {user?.displayName === null && userData?.name !== undefined ? userData?.name?.CharAt(0)?.toUppercase() + userData?.name?.slice(1) : user?.displayName?.split(" ")[0]}
             </p>
         
         </div>
