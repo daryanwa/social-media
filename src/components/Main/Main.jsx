@@ -1,23 +1,151 @@
-import React from 'react'
+import React, {useRef, useContext, useState, useReducer, useEffect} from 'react'
 import { Avatar, Button } from '@material-tailwind/react'
 import avatar from '../../assets/images/avatar.jpg'
 import live from '../../assets/images/live.png'
 import smile from '../../assets/images/smile.png'
 import addImage from '../../assets/images/add-image.png'
+import { AuthContext } from '../AppContext/AppContext'
+import { setDoc, doc, collection, documentId, serverTimestamp, query, orderBy, onSnapshot } from 'firebase/firestore'
+import { db } from '../firebase/firebase'
+import { PostsReducer, postActions, postsState } from '../AppContext/PostReducer'
+import {getStorage, ref, uploadBytesResumable, getDownloadURL} from 'firebase/storage'
+import { type } from '@testing-library/user-event/dist/type'
+
+
+
+
+
 
 function Main() {
+  
+
+
+
+  const {user, userData} = useContext(AuthContext)
+  const text = useRef('')
+  const scrollRef = useRef('')
+  const [image, setImage] = useState(null)
+  const [file, setFile] = useState(null)
+  const collectionRef = collection(db, 'posts')
+  const postRef = doc(collection(db, 'posts'))
+  const document = postRef.id
+  const [state, dispatch] = useReducer(PostsReducer, postsState)
+  const {SUBMIT_POST, HANDLE_ERROR} = postActions
+  const [progressBar, setProgressBar] = useState(0)
+
+
+  const handleUpload = (e) => {
+    setFile(e.target.files[0])
+  }
+
+
+
+
+  const handleSubmitPost = async(e) => {
+    if(text.current.value !== ''){
+    try{
+     
+        await setDoc(postRef, {
+          documentId: document,
+          uid: user?.uid || userData?.uid,
+          logo: user?.photoURL,
+          name: user?.displayName || userData?.name,
+          email: user?.email || userData?.email,
+          text: text.current.value,
+          image: image,
+          timestamp: serverTimestamp()
+        })
+        text.current.value = ''
+     
+    }catch(err){
+      dispatch({
+        type: HANDLE_ERROR,
+
+      })
+      console.log(err.message)
+    }
+  }
+    else{
+      dispatch({
+        type: HANDLE_ERROR
+      })
+    }
+  }
+
+  const storage = getStorage()
+  const metadata = {
+    contentType: ['image/jpeg', 'image/jpg', 'image/png', 'image/gif', 'image/svg+xml']
+  }
+
+
+  const submitImage = async() => {
+    const fileType = metadata.contentType.includes(file['type'])
+    console.log('file', file)
+    if(!file)return
+
+    if(fileType){
+      try{
+        const storageRef = ref(storage, `image/${file.name}`)
+        const uploadTask = uploadBytesResumable(storageRef, file, metadata.contentType)
+        await uploadTask.on('state_changed', (snapshot) => {
+          const progress = Math.round((snapshot.bytesTransferred / snapshot.totalBytes) * 100)
+          setProgressBar(progress)
+        }, (error) => {
+          alert(error)
+        },
+        async () => {
+          await getDownloadURL(uploadTask.snapshot.ref).then((downloadURL)=> {
+            setImage(downloadURL)
+          })
+        }
+        )
+      }catch(err){
+        dispatch({
+          type: HANDLE_ERROR
+        })
+        console.log(err.message)
+      }
+    }
+  }
+
+
+
+  useEffect(() => {
+    const postData = async () => {
+      const q = query(collectionRef, orderBy('timestamp', 'asc'))
+      await onSnapshot(q, (doc) => {
+        dispatch({
+          type:SUBMIT_POST,
+          posts: doc.docs.data().map((item) => item.data())
+        })
+      })
+      scrollRef.current?.scrollIntoView({
+        behavior: 'smooth'
+      })
+      setImage(null)
+      setFile(null)
+      setProgressBar(0)
+    }
+    return () => postData
+    
+  }, [SUBMIT_POST])
+    
+
+
+
+
   return (
     <div className='flex flex-col items-center'>
       <div className='flex flex-col py-4 w-[90%] bg-white rounded-3xl shadow-lg'>
         <div className='flex items-center border-b-2 border-gray-300 pb-4 pl-4 w-full'>
           <Avatar src={avatar} size='sm' className='w-12 h-12' variant='circular' alt='avatar' ></Avatar>
-          <form className='w-full'>
+          <form className='w-full' onSubmit={handleSubmitPost}>
             <div className='flex justify-between items-center'>
               <div className='w-full ml-4'>
-                <input placeholder='Write post...' className=' block py-2.5 px-0  text-sm text-gray-900 bg-transparent border-0 border-b-2 border-gray-300 appearance-none  dark:border-gray-600 dark:focus:border-blue-500 focus:outline-none focus:ring-0 focus:border-blue-600 peer w-full bg-white rounded-md' type='text' name='text'  />
+                <input ref={text} placeholder='Write post...' className=' block py-2.5 px-0  text-sm text-gray-900 bg-transparent border-0 border-b-2 border-gray-300 appearance-none  dark:border-gray-600 dark:focus:border-blue-500 focus:outline-none focus:ring-0 focus:border-blue-600 peer w-full bg-white rounded-md' type='text' name='text'  />
               </div>
               <div className='mx-4'>
-                {/* put PreviewImag */}
+                {image && <img alt='previewImage' src={image} className='h-24 rounded-xl'></img>}
               </div>
               <div className='mr-4'>
                 <Button className=' bg-gradient-to-r from-blue-500 via-blue-600 to-blue-700 hover:bg-gradient-to-br focus:ring-4 focus:outline-none focus:ring-blue-500 text-blue-500 font-medium rounded-lg text-sm px-5 py-2.5 text-center me-2 mb-2' variant='text' type='submit' >
@@ -27,18 +155,19 @@ function Main() {
             </div>
           </form>
         </div>
-        <span>
-          {/* progressBar */}
+        <span className='bg-blue-700 py-1 rounded-md' style={{width:`${progressBar}%`}}>
+          {}
         </span>
         <div className='flex justify-around items-center pt-4'>
           <div className='flex items-center'>
                 <label htmlFor='addImage' className='cursor-pointer flex items-center'>
                   <img src={addImage} alt='addimg' className='h-10 mr-4' />
-                  <input id='addImage' type='file' style={{display:'none'}} />
+                  <input onChange={handleUpload} id='addImage' type='file' style={{display:'none'}} />
                 </label>
-                {/* <Button className='bg-gradient-to-r from-blue-500 via-blue-600 to-blue-700 hover:bg-gradient-to-br focus:ring-4 focus:outline-none focus:ring-blue-500 text-blue-500 font-medium rounded-lg text-sm px-2 py-1 text-center me-2 mb-2' variant='text' type='submit'>
+                {file && 
+                <Button onClick={submitImage} variant='text' className='bg-gradient-to-r from-blue-500 via-blue-600 to-blue-700 hover:bg-gradient-to-br focus:ring-4 focus:outline-none focus:ring-blue-500 text-blue-500 font-medium rounded-lg text-sm px-2 py-1 text-center me-2 mb-2' variant='text' type='submit'>
                   Upload
-                </Button> */}
+                </Button> }
           </div>
           <div className='flex items-center'>
             <img src={live} alt='live' className='h-10 mr-4' />
@@ -53,7 +182,7 @@ function Main() {
       <div className='flex flex-col py-4 w-full'>
         {/* posts */}
       </div>
-      <div >
+      <div ref={scrollRef} >
         {/* ref for later */}
       </div>
     </div>

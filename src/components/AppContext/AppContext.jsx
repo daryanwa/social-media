@@ -5,6 +5,8 @@ import {auth, db, onAuthStateChanged} from '../firebase/firebase'
 import { addDoc, collection, getDocs, onSnapshot, query, where } from 'firebase/firestore'
 import {useNavigate} from 'react-router-dom'
 
+
+
 export const AuthContext = createContext()
 
 
@@ -97,8 +99,12 @@ function AppContext({children}) {
     }
 
 
+
+
+
+
+
     
-    console.log('userData', userData)
     
 
 
