@@ -2,7 +2,7 @@ import React from 'react'
 
 
 
-function Card({name,img}) {
+function Card({name,img,}) {
  
   return (
     <div>

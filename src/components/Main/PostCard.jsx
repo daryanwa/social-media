@@ -6,12 +6,12 @@ import comment from '../../assets/images/comment.png'
 import remove from '../../assets/images/delete.png'
 
 
-function PostCard({uid, id, logo, name, text, email, image, timestamp}) {
+function PostCard({uid, id, logo, name, text, email, image, timestamp, userData}) {
   return (
     <div className='mb-4'>
-        <div className='flex flex-col py-4 bg-white rounded-t-3xl'>
+        <div className='flex flex-col py-4 mx-4 px-4 bg-white rounded-3xl'>
             <div className='flex items-center pb-4 ml-2'>
-                <Avatar size='sm' variant='circular' alt='avatar' src={logo || avatar} /> 
+                <Avatar size='sm' variant='circular' alt='avatar' src={ userData?.photoURL || logo || avatar} /> 
                 <div className='flex flex-col'>
                     <p className='ml-4 py-2 font-roboto font-medium text-sm text-gray-700 no-underline tracking-normal leading-none'>{email}</p>
                     <p className='ml-4 font-roboto font-medium text-sm text-gray-700 no-underline tracking-normal leading-none'>Published: {timestamp}</p>
@@ -22,10 +22,10 @@ function PostCard({uid, id, logo, name, text, email, image, timestamp}) {
                 <p className='ml-4 pb-4 font-roboto font-medium text-sm text-gray-700 no-underline tracking-normal leading-none'>
                     {text}
                 </p>
-                {image && <img src={image} alt='postImage' className='h-[500px] w-full' />}
+                {image && <img src={image} alt='postImage' className='h-[800px] w-full' />}
             </div>
             <div className='flex justify-around items-center pt-4'>
-                <button className='flex items-center cursor-pointer rounded-lg p-2 hover:bg-gray-100'>
+                <button className='  border-none flex items-center cursor-pointer rounded-lg p-2 bg-white hover:bg-gray-100 '>
                     <img src={like} className='h-8 mr-4' alt='/' />
                     {/* <p>display Likes</p> */}
                 </button>
@@ -35,7 +35,7 @@ function PostCard({uid, id, logo, name, text, email, image, timestamp}) {
                         <p className='font-roboto font-medium text-md text-gray-700 no-underline tracking-normal leading-none'>Comments</p>
                     </div>
                 </div>  
-                <div className='flex place-items-center'>
+                <div className='flex place-items-center hover:bg-gray-100 cursor-pointer rounded-lg p-2'>
                     <img src={remove} alt='delete' className='h-8 mr-4' />
                     <p className='font-roboto font-medium text-md text-gray-700 no-underline tracking-normal leading-none'>Delete</p>
                 </div>

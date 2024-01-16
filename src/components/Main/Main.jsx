@@ -43,6 +43,7 @@ function Main() {
 
 
   const handleSubmitPost = async(e) => {
+    e.preventDefault()
     if(text.current.value !== ''){
     try{
      
@@ -113,23 +114,20 @@ function Main() {
 
   useEffect(() => {
     const postData = async () => {
-      const q = query(collectionRef, orderBy('timestamp', 'asc'))
+      const q = query(collectionRef, orderBy("timestamp", "asc"));
       await onSnapshot(q, (doc) => {
         dispatch({
-          type:SUBMIT_POST,
-          posts: doc.docs.data().map((item) => item.data())
-        })
-      })
-      scrollRef.current?.scrollIntoView({
-        behavior: 'smooth'
-      })
-      setImage(null)
-      setFile(null)
-      setProgressBar(0)
-    }
-    return () => postData
-    
-  }, [SUBMIT_POST])
+          type: SUBMIT_POST,
+          posts: doc?.docs?.map((item) => item?.data()),
+        });
+        scrollRef?.current?.scrollIntoView({ behavior: "smooth" });
+        setImage(null);
+        setFile(null);
+        setProgressBar(0);
+      });
+    };
+    return () => postData();
+  }, [SUBMIT_POST]);
     
 
 
@@ -139,7 +137,7 @@ function Main() {
     <div className='flex flex-col items-center'>
       <div className='flex flex-col py-4 w-[90%] bg-white rounded-3xl shadow-lg'>
         <div className='flex items-center border-b-2 border-gray-300 pb-4 pl-4 w-full'>
-          <Avatar src={avatar} size='sm' className='w-12 h-12' variant='circular' alt='avatar' ></Avatar>
+          <Avatar src={userData?.image || avatar} size='sm' className='w-12 h-12' variant='circular' alt='avatar' ></Avatar>
           <form className='w-full' onSubmit={handleSubmitPost}>
             <div className='flex justify-between items-center'>
               <div className='w-full ml-4'>
@@ -149,7 +147,7 @@ function Main() {
                 {image && <img alt='previewImage' src={image} className='h-24 rounded-xl'></img>}
               </div>
               <div className='mr-4'>
-                <Button onClick={(e)=> e.preventDefault()} className=' bg-gradient-to-r from-blue-500 via-blue-600 to-blue-700 hover:bg-gradient-to-br focus:ring-4 focus:outline-none focus:ring-blue-500 text-blue-500 font-medium rounded-lg text-sm px-5 py-2.5 text-center me-2 mb-2' variant='text' type='submit' >
+                <Button onClick={handleSubmitPost} className=' bg-gradient-to-r from-blue-500 via-blue-600 to-blue-700 hover:bg-gradient-to-br focus:ring-4 focus:outline-none focus:ring-blue-500 text-blue-500 font-medium rounded-lg text-sm px-5 py-2.5 text-center me-2 mb-2' variant='text' type='submit' >
                   Share
                 </Button>
               </div>
@@ -193,7 +191,10 @@ function Main() {
           image={post?.image} 
           email={post?.email} 
           text={post?.text} 
-          timestamp={new Date(post?.timestamp?.toDate()?.toUTCString())} />
+          timestamp={new Date(
+            post?.timestamp?.toDate()
+          )?.toUTCString()}
+          />
         })}</div>}
       </div>
       <div ref={scrollRef} >
