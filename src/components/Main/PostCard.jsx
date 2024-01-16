@@ -1,4 +1,4 @@
-import React, { useContext, useEffect, useReducer } from 'react'
+import React, { useContext, useEffect, useReducer, useState } from 'react'
 import { Avatar } from '@material-tailwind/react'
 import avatar from '../../assets/images/avatar.jpg'
 import like from '../../assets/images/like.png'
@@ -18,8 +18,14 @@ function PostCard({uid, id, logo, name, text, email, image, timestamp}) {
     const [state, dispatch] = useReducer(PostsReducer, postsState)
     const likesRef = doc(collection(db, "posts", id, 'likes'));
     const likesCollection = collection(db, "posts", id, "likes");
-    console.log(likesCollection)
     const {ADD_LIKE, HANDLE_ERROR} = postActions
+    const [open, setOpen] = useState(false)
+
+
+    const handleOpen = (e) => {
+      e.preventDefault()
+      setOpen(true)
+    }
 
 
     const addUser = async() => {
@@ -111,6 +117,7 @@ function PostCard({uid, id, logo, name, text, email, image, timestamp}) {
                 onClick={handleLike}
                  className='  border-none flex items-center cursor-pointer rounded-lg p-2 bg-white hover:bg-gray-100 '>
                     <img src={like} className='h-8 mr-4' alt='/' />
+                    <span>Likes:</span>
                     {state.likes?.length > 0 && state?.likes?.length}
                 </button>
                 <div className='flex items-center cursor-pointer rounded-lg p-2 hover:bg-gray-100'>
