@@ -10,7 +10,8 @@ import { db } from '../firebase/firebase'
 import { PostsReducer, postActions, postsState } from '../AppContext/PostReducer'
 import {getStorage, ref, uploadBytesResumable, getDownloadURL} from 'firebase/storage'
 import { type } from '@testing-library/user-event/dist/type'
-
+import {Alert} from '@material-tailwind/react'
+import PostCard from './PostCard'
 
 
 
@@ -148,7 +149,7 @@ function Main() {
                 {image && <img alt='previewImage' src={image} className='h-24 rounded-xl'></img>}
               </div>
               <div className='mr-4'>
-                <Button className=' bg-gradient-to-r from-blue-500 via-blue-600 to-blue-700 hover:bg-gradient-to-br focus:ring-4 focus:outline-none focus:ring-blue-500 text-blue-500 font-medium rounded-lg text-sm px-5 py-2.5 text-center me-2 mb-2' variant='text' type='submit' >
+                <Button onClick={(e)=> e.preventDefault()} className=' bg-gradient-to-r from-blue-500 via-blue-600 to-blue-700 hover:bg-gradient-to-br focus:ring-4 focus:outline-none focus:ring-blue-500 text-blue-500 font-medium rounded-lg text-sm px-5 py-2.5 text-center me-2 mb-2' variant='text' type='submit' >
                   Share
                 </Button>
               </div>
@@ -165,7 +166,7 @@ function Main() {
                   <input onChange={handleUpload} id='addImage' type='file' style={{display:'none'}} />
                 </label>
                 {file && 
-                <Button onClick={submitImage} variant='text' className='bg-gradient-to-r from-blue-500 via-blue-600 to-blue-700 hover:bg-gradient-to-br focus:ring-4 focus:outline-none focus:ring-blue-500 text-blue-500 font-medium rounded-lg text-sm px-2 py-1 text-center me-2 mb-2' variant='text' type='submit'>
+                <Button onClick={submitImage} variant='text' className='bg-gradient-to-r from-blue-500 via-blue-600 to-blue-700 hover:bg-gradient-to-br focus:ring-4 focus:outline-none focus:ring-blue-500 text-blue-500 font-medium rounded-lg text-sm px-2 py-1 text-center me-2 mb-2'  type='submit'>
                   Upload
                 </Button> }
           </div>
@@ -180,7 +181,20 @@ function Main() {
         </div>
       </div>
       <div className='flex flex-col py-4 w-full'>
-        {/* posts */}
+        {state.error 
+        ? <div className='flex justify-center items-center'><Alert color='red'>Something went wrong, try again...</Alert></div> 
+        : <div>{state?.posts?.length > 0 && state?.posts?.map((post, index) => {
+          return <PostCard 
+          logo={post?.logo} 
+          id={post?.documentId} 
+          key={index} 
+          uid={post?.uid} 
+          name={post?.name} 
+          image={post?.image} 
+          email={post?.email} 
+          text={post?.text} 
+          timestamp={new Date(post?.timestamp?.toDate()?.toUTCString())} />
+        })}</div>}
       </div>
       <div ref={scrollRef} >
         {/* ref for later */}
