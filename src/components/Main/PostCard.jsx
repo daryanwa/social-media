@@ -10,6 +10,7 @@ import { addDoc, arrayUnion, collection, updateDoc, where } from 'firebase/fires
 import { setDoc, doc, getDocs, deleteDoc, serverTimestamp, query, orderBy, onSnapshot } from 'firebase/firestore'
 import { db } from '../firebase/firebase'
 import addFriend from '../../assets/images/add-friend.png'
+import CommentSection from './CommentSection'
 
 
 function PostCard({uid, id, logo, name, text, email, image, timestamp}) {
@@ -120,7 +121,7 @@ function PostCard({uid, id, logo, name, text, email, image, timestamp}) {
                     <span>Likes:</span>
                     {state.likes?.length > 0 && state?.likes?.length}
                 </button>
-                <div className='flex items-center cursor-pointer rounded-lg p-2 hover:bg-gray-100'>
+                <div className='flex items-center cursor-pointer rounded-lg p-2 hover:bg-gray-100 ' onClick={handleOpen}>
                     <div className='flex items-center cursor-pointer'>
                         <img src={comment} alt='comment' className='h-8 mr-4' />
                         <p className='font-roboto font-medium text-md text-gray-700 no-underline tracking-normal leading-none'>Comments</p>
@@ -132,6 +133,7 @@ function PostCard({uid, id, logo, name, text, email, image, timestamp}) {
                 </div>
             </div>
         </div>
+        {open && <CommentSection postId={id} /> }
     </div>
   )
 }
