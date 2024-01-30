@@ -43,7 +43,7 @@ function UserLinks() {
                 <Avatar src={userData?.image ? userData?.image : avatar} size="sm" alt='avatar' className='z-30 w-8 h-8 object-cover rounded-full' />
             </Tooltip>
             <p className='ml-4 font-roboto text-sm text-black font-medium no-underline'>
-                {user?.displayName === null && userData?.name !== undefined ? userData?.name?.CharAt(0)?.toUppercase() + userData?.name?.slice(1) : user?.displayName?.split(" ")[0]}
+                {user?.displayName === null && userData?.displayName !== undefined ? userData?.displayName?.CharAt(0)?.toUppercase() + userData?.name?.slice(1) : user?.displayName?.split(" ")[0]}
             </p>
         
         </div>

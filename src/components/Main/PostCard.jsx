@@ -21,11 +21,11 @@ function PostCard({uid, id, logo, name, text, email, image, timestamp}) {
     const likesCollection = collection(db, "posts", id, "likes");
     const {ADD_LIKE, HANDLE_ERROR} = postActions
     const [open, setOpen] = useState(false)
-
+    const singlePostDocument = doc(db, 'posts', id)
 
     const handleOpen = (e) => {
       e.preventDefault()
-      setOpen(true)
+      setOpen(!open)
     }
 
 
@@ -67,6 +67,22 @@ function PostCard({uid, id, logo, name, text, email, image, timestamp}) {
           console.log(err.message);
         }
       };
+
+
+      const deletePost = async(e) => {
+        e.preventDefault()
+        try{
+          if(user?.uid === uid){
+            await deleteDoc(singlePostDocument)
+          }else{
+            alert('You cant delete other users posts')
+          }
+        }catch(err){
+          console.log(err.message)
+        }
+      }
+
+
 
 
 
@@ -127,13 +143,15 @@ function PostCard({uid, id, logo, name, text, email, image, timestamp}) {
                         <p className='font-roboto font-medium text-md text-gray-700 no-underline tracking-normal leading-none'>Comments</p>
                     </div>
                 </div>  
-                <div className='flex place-items-center hover:bg-gray-100 cursor-pointer rounded-lg p-2'>
+                <div className='flex place-items-center hover:bg-gray-100 cursor-pointer rounded-lg p-2' onClick={deletePost}>
                     <img src={remove} alt='delete' className='h-8 mr-4' />
                     <p className='font-roboto font-medium text-md text-gray-700 no-underline tracking-normal leading-none'>Delete</p>
                 </div>
             </div>
         </div>
-        {open && <CommentSection postId={id} /> }
+        <div className='px-4 '>
+          {open && <CommentSection postId={id} /> }
+        </div>
     </div>
   )
 }

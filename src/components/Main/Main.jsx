@@ -80,41 +80,45 @@ function Main() {
   }
 
 
-  const submitImage = async() => {
-    const fileType = metadata.contentType.includes(file['type'])
-    console.log('file', file)
-    if(!file)return
-
-    if(fileType){
-      try{
-        const storageRef = ref(storage, `image/${file.name}`)
-        const uploadTask = uploadBytesResumable(storageRef, file, metadata.contentType)
-        await uploadTask.on('state_changed', (snapshot) => {
-          const progress = Math.round((snapshot.bytesTransferred / snapshot.totalBytes) * 100)
-          setProgressBar(progress)
-        }, (error) => {
-          alert(error)
-        },
-        async () => {
-          await getDownloadURL(uploadTask.snapshot.ref).then((downloadURL)=> {
-            setImage(downloadURL)
-          })
-        }
-        )
-      }catch(err){
+  const submitImage = async () => {
+    const fileType = metadata.contentType.includes(file['type']);
+    console.log('file', file);
+    if (!file) return; // Добавьте эту проверку, чтобы избежать отправки изображения, если файл не был выбран
+  
+    if (fileType) {
+      try {
+        const storageRef = ref(storage, `image/${file.name}`);
+        const uploadTask = uploadBytesResumable(storageRef, file, metadata.contentType);
+        await uploadTask.on(
+          'state_changed',
+          (snapshot) => {
+            const progress = Math.round((snapshot.bytesTransferred / snapshot.totalBytes) * 100);
+            setProgressBar(progress);
+          },
+          (error) => {
+            alert(error);
+          },
+          async () => {
+            await getDownloadURL(uploadTask.snapshot.ref).then((downloadURL) => {
+              setImage(downloadURL);
+            });
+          }
+        );
+      } catch (err) {
         dispatch({
-          type: HANDLE_ERROR
-        })
-        console.log(err.message)
+          type: HANDLE_ERROR,
+        });
+        console.log(err.message);
       }
     }
-  }
-
+  };
+  
+  
 
 
   useEffect(() => {
     const postData = async () => {
-      const q = query(collectionRef, orderBy("timestamp", "asc"));
+      const q = query(collectionRef, orderBy("timestamp", "desc"));
       await onSnapshot(q, (doc) => {
         dispatch({
           type: SUBMIT_POST,
@@ -126,6 +130,7 @@ function Main() {
         setProgressBar(0);
       });
     };
+    
     return () => postData();
   }, [SUBMIT_POST]);
     
