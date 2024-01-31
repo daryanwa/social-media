@@ -10,8 +10,9 @@ import { db } from '../firebase/firebase'
 import { PostsReducer, postActions, postsState } from '../AppContext/PostReducer'
 import {getStorage, ref, uploadBytesResumable, getDownloadURL} from 'firebase/storage'
 import { type } from '@testing-library/user-event/dist/type'
-import {Alert} from '@material-tailwind/react'
+import {Alert, Popover} from '@material-tailwind/react'
 import PostCard from './PostCard'
+import  EmojiPicker  from 'emoji-picker-react';
 
 
 
@@ -33,7 +34,16 @@ function Main() {
   const [state, dispatch] = useReducer(PostsReducer, postsState)
   const {SUBMIT_POST, HANDLE_ERROR} = postActions
   const [progressBar, setProgressBar] = useState(0)
+  const [emojiPicker, setEmojiPicker] = useState('');
+  const [selectedEmoji, setSelectedEmoji] = useState('');
+  const [postText, setPostText] = useState('');
+  
+  const handleEmojiSelect = (event) => {
+    setPostText((prevText) => prevText + event.emoji);
+    setSelectedEmoji(event.native);
 
+  };
+console.log('Selected emoji:', selectedEmoji)
 
   const handleUpload = (e) => {
     setFile(e.target.files[0])
@@ -58,7 +68,7 @@ function Main() {
           timestamp: serverTimestamp()
         })
         text.current.value = ''
-     
+       
     }catch(err){
       dispatch({
         type: HANDLE_ERROR,
@@ -137,7 +147,6 @@ function Main() {
 
 
 
-
   return (
     <div className='flex flex-col items-center'>
       <div className='flex flex-col py-4 w-[90%] bg-white rounded-3xl shadow-lg'>
@@ -146,7 +155,12 @@ function Main() {
           <form className='w-full' onSubmit={handleSubmitPost}>
             <div className='flex justify-between items-center'>
               <div className='w-full ml-4'>
-                <input ref={text} placeholder='Write post...' className=' block py-2.5 px-0  text-sm text-gray-900 bg-transparent border-0 border-b-2 border-gray-300 appearance-none  dark:border-gray-600 dark:focus:border-blue-500 focus:outline-none focus:ring-0 focus:border-blue-600 peer w-full bg-white rounded-md' type='text' name='text'  />
+                <input 
+                onChange={(e) => setPostText(e.target.value)}
+                value={postText} 
+                ref={text} 
+                placeholder='Write post...' 
+                className=' block py-2.5 px-0  text-sm text-gray-900 bg-transparent border-0 border-b-2 border-gray-300 appearance-none  dark:border-gray-600 dark:focus:border-blue-500 focus:outline-none focus:ring-0 focus:border-blue-600 peer w-full bg-white rounded-md' type='text' name='text'  />
               </div>
               <div className='mx-4'>
                 {image && <img alt='previewImage' src={image} className='h-24 rounded-xl'></img>}
@@ -177,9 +191,17 @@ function Main() {
             <img src={live} alt='live' className='h-10 mr-4' />
             <p className='font-roboto font-medium text-md text-gray-700 no-underline tracking-normal leading-none'>Live</p>
           </div>
-          <div className='flex items-center'>
-            <img src={smile} alt='live' className='h-10 mr-4' />
-            <p className='font-roboto font-medium text-md text-gray-700 no-underline tracking-normal leading-none'>Smile</p>
+          <div className='flex items-center' >
+            <img src={smile}  alt='smile' className='h-10 mr-4 cursor-pointer z-20'onClick={()=> setEmojiPicker(!emojiPicker)}   />
+           
+              {emojiPicker && (
+
+                <div  className='absolute z-10 pl-10' >            
+                    <EmojiPicker onEmojiClick={handleEmojiSelect} lazyLoadEmojis={true} />
+                </div>
+            
+                )}
+          
           </div>
         </div>
       </div>

@@ -28,7 +28,7 @@ function CommentSection({postId}) {
                     id: commentRef.id,
                     comment: comment.current.value,
                     image: user?.photoURL,
-                    name: user?.displayName?.split(' '[0] || userData?.name?.charAt(0)?.toUpperCase() + userData?.name?.slice()),
+                    name: user?.displayName?.split(""[0] || userData?.name?.charAt(1)?.toUpperCase() + userData?.name?.slice()),
                     timestamp: serverTimestamp()
                 })
                 comment.current.value = ""

@@ -1,11 +1,17 @@
-import React from 'react'
+import React, {useState} from 'react'
 import Navbar from '../Navbar/Navbar'
 import LeftSide from '../LeftSideBar/LeftSide'
 import RightSide from '../RightSideBar/RightSide'
 import CardSection from '../Main/CardSection'
 import Main from '../Main/Main'
 
+
+
+
 function Home() {
+
+
+  
   return (
     <div className='w-full'>
      <div className='fixed top-0 z-10 w-full bg-white'>
@@ -26,7 +32,7 @@ function Home() {
             <RightSide />
         </div>
     </div>
-</div>
+    </div>
   )
 }
 

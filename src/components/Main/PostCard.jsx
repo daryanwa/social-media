@@ -113,6 +113,7 @@ function PostCard({uid, id, logo, name, text, email, image, timestamp}) {
             <div className='flex items-center pb-4 ml-2'>
                 <Avatar size='sm' variant='circular' alt='avatar' src={  logo || avatar} /> 
                 <div className='flex flex-col'>
+                    <p className='ml-4 py-2 font-roboto font-medium text-sm text-gray-700 no-underline tracking-normal leading-none'>{name}</p>
                     <p className='ml-4 py-2 font-roboto font-medium text-sm text-gray-700 no-underline tracking-normal leading-none'>{email}</p>
                     <p className='ml-4 font-roboto font-medium text-sm text-gray-700 no-underline tracking-normal leading-none'>Published: {timestamp}</p>
                 </div>

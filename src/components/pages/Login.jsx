@@ -9,13 +9,13 @@ import {
     Button,
   } from "@material-tailwind/react";
 import { useFormik } from "formik";
-import { useContext, useEffect } from "react";
+import { useContext, useEffect, useState } from "react";
 import * as Yup from 'yup'
 import { AuthContext } from "../AppContext/AppContext";
 // import { onAuthStateChanged } from "firebase/auth";
 import {auth, onAuthStateChanged} from '../firebase/firebase'
 import {useNavigate} from 'react-router-dom'
-
+import ClipLoader from 'react-spinners/ClipLoader'
 
   export default function Login() {
 
@@ -24,13 +24,17 @@ const {signInWithGoogle, loginWithEmailAndPassword} = useContext(AuthContext)
 const navigate = useNavigate()
 
 
+const [loading, setLoading] = useState(false)
+
 
 useEffect(() => {
+  setLoading(true);
   onAuthStateChanged(auth,(user)=> {
     if(user) {
       navigate('/')
+      setLoading(false);
     }else{
-
+      setLoading(false);
     }
   })
 },[navigate])
@@ -53,101 +57,114 @@ const handleSubmit = (e) => {
     const {email, password} = formik.values
     if(formik.isValid === true){
         loginWithEmailAndPassword({email, password})
+        setLoading(true)
+  
+        
     }else{
+        setLoading(false)
         alert('check your input fields')
     }
     console.log('formik', formik)
-}
+  }
+ 
 
 const formik = useFormik({initialValues, validationSchema, handleSubmit})
 
     return (
+      <>
+        {loading ?(
+
+          <div className="grid grid-cols-1 justify-items-center items-center h-screen">
+          <ClipLoader color="#d6c136" size={150} speedMultiplier={0.5} />
+       </div>
+          ) : (
         <div className="font-roboto flex justify-center mx-auto h-screen items-center bg-slate-200">
 
-      <Card className="w-96  ">
-        <CardHeader
-          variant="gradient"
-          color="gray"
-          className="bg-yellow-500 mb-10  grid h-28 place-items-center"
-          >
-          <Typography variant="h3"   color="blue">
-            Sign In
-          </Typography>
-        </CardHeader>
-        <CardBody className="flex flex-col gap-4">
-              <form onSubmit={handleSubmit} className="mx-2">
-                <div className="mb-2 mx-2">
-                  <Input
-                    name="email"
-                    type="email"
-                    placeholder="Email"
-                    className="py-2 px-2 outline-none"
-                    size="lg"
-                    {...formik.getFieldProps("email")}
-                  />
-                </div>
-                <div className="mx-2">
-                  {formik.touched.email && formik.errors.email && (
-                    <Typography variant="small" color="red">
-                      {formik.errors.email}
+              <Card className="w-96  ">
+                <CardHeader
+                  variant="gradient"
+                  color="gray"
+                  className="bg-yellow-500 mb-10  grid h-28 place-items-center"
+                  >
+                  <Typography variant="h3"   color="blue">
+                    Sign In
+                  </Typography>
+                </CardHeader>
+                <CardBody className="flex flex-col gap-4">
+                      <form onSubmit={handleSubmit} className="mx-2">
+                        <div className="mb-2 mx-2">
+                          <Input
+                            name="email"
+                            type="email"
+                            placeholder="Email"
+                            className="py-2 px-2 outline-none"
+                            size="lg"
+                            {...formik.getFieldProps("email")}
+                          />
+                        </div>
+                        <div className="mx-2">
+                          {formik.touched.email && formik.errors.email && (
+                            <Typography variant="small" color="red">
+                              {formik.errors.email}
+                            </Typography>
+                          )}
+                        </div>
+                        <div className="mt-4 mb-2 mx-2">
+                          <Input
+                            name="password"
+                            type="password"
+                            placeholder="Password"
+                            className="py-2 px-2 outline-none "
+                            size="lg"
+                            {...formik.getFieldProps("password")}
+                          />
+                          <div>
+                            {formik.touched.password && formik.errors.password && (
+                              <Typography variant="small" color="red">
+                                {formik.errors.password}
+                              </Typography>
+                            )}
+                          </div>
+                        </div>
+                        <Button
+                          variant="gradient"
+                          
+                          className="mb-4 px-2 py-5 mx-2 w-[96%] bg-yellow-500"
+                          type="submit"
+
+                        >
+                          Login
+                        </Button>
+                        <Button
+                          onClick={signInWithGoogle}
+                          variant="gradient"
+                          
+                          className="mb-4 px-2 py-5 mx-2 w-[96%] bg-yellow-500"
+                          type="submit"
+
+                        >
+                          Sign in with Google
+                        </Button>
+
+                      </form>
+                    </CardBody>
+                <CardFooter className="pt-0 bg-">
+                  <Typography variant="small" className="mt-6 flex bg justify-center">
+                    Problem with account?
+                    <Typography
+                      as="a"
+                      href="#telegram"
+                      variant="small"
+                      color="blue-gray"
+                      className="ml-1 font-bold"
+                      >
+                      <a href="tg://resolve?domain=daryanwa">Telegram</a>
                     </Typography>
-                  )}
-                </div>
-                <div className="mt-4 mb-2 mx-2">
-                  <Input
-                    name="password"
-                    type="password"
-                    placeholder="Password"
-                    className="py-2 px-2 outline-none "
-                    size="lg"
-                    {...formik.getFieldProps("password")}
-                  />
-                  <div>
-                    {formik.touched.password && formik.errors.password && (
-                      <Typography variant="small" color="red">
-                        {formik.errors.password}
-                      </Typography>
-                    )}
-                  </div>
-                </div>
-                <Button
-                  variant="gradient"
-                  
-                  className="mb-4 px-2 py-5 mx-2 w-[96%] bg-yellow-500"
-                  type="submit"
-
-                >
-                  Login
-                </Button>
-                <Button
-                  onClick={signInWithGoogle}
-                  variant="gradient"
-                  
-                  className="mb-4 px-2 py-5 mx-2 w-[96%] bg-yellow-500"
-                  type="submit"
-
-                >
-                  Sign in with Google
-                </Button>
-
-              </form>
-            </CardBody>
-        <CardFooter className="pt-0 bg-">
-          <Typography variant="small" className="mt-6 flex bg justify-center">
-            Problem with account?
-            <Typography
-              as="a"
-              href="#telegram"
-              variant="small"
-              color="blue-gray"
-              className="ml-1 font-bold"
-              >
-              <a href="tg://resolve?domain=daryanwa">Telegram</a>
-            </Typography>
-          </Typography>
-        </CardFooter>
-      </Card>
-                </div>
+                  </Typography>
+                </CardFooter>
+              </Card>
+          </div>)}
+     </>
     );
   }
   
