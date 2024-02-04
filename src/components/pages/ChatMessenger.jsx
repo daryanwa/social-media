@@ -1,34 +1,174 @@
-import React from 'react'
 import Navbar from '../Navbar/Navbar'
-
-
+import React, {useState, useEffect, useRef, useContext} from 'react'
+import nature from '../../assets/images/nature.jpg'
+import { Tooltip, Avatar } from '@material-tailwind/react'
+import avatar from '../../assets/images/avatar.jpg'
+import remove from '../../assets/images/delete.png'
+import { AuthContext } from '../AppContext/AppContext'
+import { arrayRemove, collection, getDocs, query, where, updateDoc, doc, orderBy } from 'firebase/firestore';
+import { auth, db } from '../firebase/firebase';
+import { Link } from 'react-router-dom';
+import { useCollectionData } from 'react-firebase-hooks/firestore';
 
 function ChatMessenger() {
+  const [input, setInput] = useState("");
+  let [data, setData] = useState([])
+  const {user, userData} = useContext(AuthContext)
+  const friendList = userData?.friends;
+  
+
+
+  const messagesRef  = collection(db, 'messages')
+  const q = query(messagesRef, orderBy("timestamp", "desc"));
+  const [messages] = useCollectionData(q, {idField: 'id'})
+  
+
+
+  function ChatMessage(props) {
+    const { text, uid, photoURL } = props.message;
+  
+    const messageClass = uid === auth.currentUser.uid ? 'sent' : 'received'
+  
+    return (<>
+      <div className={`message ${messageClass} `}>
+        <img src={photoURL || 'https://api.adorable.io/avatars/23/abott@adorable.png'} />
+        <p>{text}</p>
+      </div>
+    </>)
+  }
+
+
+
+
+  // FRIENDS AND SEARCH
+  const searchFriends = (data) => {
+    return data.filter((item) =>
+      item["name"].toLowerCase().includes(input.toLowerCase())
+    );
+  };
+
+  const removeFriend = async (id, name, image) => {
+    const q = query(collection(db, "users"), where("uid", "==", user?.uid));
+    const getDoc = await getDocs(q);
+    const userDocumentId = getDoc.docs[0].id;
+
+    await updateDoc(doc(db, "users", userDocumentId), {
+      friends: arrayRemove({ id: id, name: name, image: image }),
+    });
+  };
+// END FRIENDS AND SEARCH
+
   return (
-    <div className='w-full'>
-    <div className='fixed top-0 z-10 w-full bg-white'>
-      {/* Navbar component */}
-      <Navbar />
-    </div>
-  
-    <div className='flex bg-gray-100 h-screen'>
-      {/* Sidebar on the left */}
-      <div className='flex-auto w-[20%] fixed top-12 bg-gray-200 p-4'>
-        {/* Sidebar content goes here */}
+    <div className='w-full' style={{ margin: 0, padding: 0 }}>
+      <div className='fixed top-0  w-full bg-white z-40' >
+        {/* Navbar component */}
+        <Navbar />
       </div>
   
-      {/* Main chat area in the center */}
-      <div className='flex-auto w-[60%] absolute left-[20%] top-14 bg-gray-100 rounded-xl p-4'>
-        <div className='w-80% mx-auto'>
-          {/* Chat messages and input go here */}
+      <div className='flex bg-gray-100 flex-col  h-screen'>
+        <div className='flex  flex-col h-screen w-[20%]  mt-12'>
+          <div className='flex  flex-col items-center relative'>
+              <img src={nature} alt='nature' className='h-28 w-full rounded-r-xl object-cover' />
+        
+          <div className='absolute -bottom-4'>
+              <Tooltip content='Profile' placement='top'>
+                  <Avatar src={userData?.image ? userData?.image : avatar} className='z-30 w-20 h-20 object-cover rounded-full' size='md' />
+              </Tooltip>
+          </div>
+          </div>
+          <div className='flex flex-col items-center pt-6'>
+              <p className='font-roboto font-medium text-md mb-2 text-gray-700 no-underline tracking-normal leading-none'>
+                  {user?.email || userData?.email}
+              </p>
+              <p className='font-roboto font-medium text-md mb-2 text-gray-700 no-underline tracking-normal leading-none'>
+                  {user?.name || userData?.name}
+              </p>
+             
+          </div>
+          <input
+          className="border-0 outline-none mt-4 h-[30px] mx-4 rounded-xl"
+          name="input"
+          value={input}
+          type="text"
+          placeholder=" Search friends"
+          onChange={(e) => setInput(e.target.value)}
+        ></input>
+          {friendList?.length > 0 ? (
+          searchFriends(friendList)?.map((friend) => {
+            return (
+              <div
+              className="flex items-center justify-between hover:bg-gray-100 mt-2 border border-gray-300 rounded p-2 duration-300 ease-in-out"
+              key={friend.id}
+            >
+              <div className="flex items-center my-2 cursor-pointer">
+                <div className="flex items-center">
+                  <Avatar
+                    className='rounded-full size-12'  
+                    src={friend?.image || avatar}
+                    alt="avatar"
+                  ></Avatar>
+                  <p className="ml-4 font-roboto font-medium text-sm text-gray-700 no-underline tracking-normal leading-none">
+                    {friend.name}
+                  </p>
+                </div>
+              </div>
+
+
+
+                <div className="mr-4">
+                  <img
+                    onClick={() =>
+                      removeFriend(friend.id, friend.name, friend.image)
+                    }
+                    className="cursor-pointer"
+                    src={remove}
+                    alt="deleteFriend"
+                  ></img>
+                </div>
+              </div>
+            );
+          })
+        ) : (
+          <p className="mt-10 font-roboto font-medium text-sm text-gray-700 no-underline tracking-normal leading-none">
+            Add friends to check their profile
+          </p>
+        )}
+      </div>
+     
+    
+        {/* Main chat area in the center */}
+            <div className='flex-auto  w-[60%] absolute  left-[20%] top-14 bg-gray-100 rounded-xl p-4 mt-4 '>
+              <div className='w-80% mx-auto'>
+              <div className='mb-4'>
+                <div className='flex flex-col py-4 mx-4 px-4 bg-white rounded-3xl'>
+                    <div className='flex items-center pb-4 ml-2'>
+                        <Avatar size='sm' variant='circular' alt='avatar' src={  userData?.photoURL } /> 
+                        <div className='flex flex-col'>
+                            <p className='ml-4 py-2 font-roboto font-medium text-sm text-gray-700 no-underline tracking-normal leading-none'>name</p>
+                         
+                            <p className='ml-4 font-roboto font-medium text-sm text-gray-700 no-underline tracking-normal leading-none'>Published: timestamp</p>
+                        </div>
+                 
+                    </div>
+                    <div className=''>
+                        <div className='ml-4 pb-[60%] font-roboto font-medium text-sm text-gray-700 no-underline tracking-normal leading-none'>
+                          
+                          {messages && messages.map((msg) => 
+                          <ChatMessage key={msg.id} message={msg} />)}
+                        </div>
+                      
+                    </div>
+                    <div className='flex justify-around items-center pt-4'>
+                       <input className='' />
+                    </div>
+                </div>
+                </div>
+              </div>
         </div>
+    
+        {/* Sidebar on the right */}
+       
       </div>
-  
-      {/* Sidebar on the right */}
-      <div className='flex-auto w-[20%] fixed right-0 top-12 bg-gray-200 p-4'>
-        {/* Sidebar content goes here */}
-      </div>
-    </div>
   </div>
   
   )
