@@ -5,7 +5,7 @@ import { Tooltip, Avatar } from '@material-tailwind/react'
 import avatar from '../../assets/images/avatar.jpg'
 import remove from '../../assets/images/delete.png'
 import { AuthContext } from '../AppContext/AppContext'
-import { arrayRemove, collection, getDocs, query, where, updateDoc, doc, orderBy, serverTimestamp, setDoc, addDoc } from 'firebase/firestore';
+import { arrayRemove, collection, getDocs, query, where, updateDoc, doc, orderBy, serverTimestamp, setDoc, addDoc, onSnapshot } from 'firebase/firestore';
 import { auth, db } from '../firebase/firebase';
 import { Link } from 'react-router-dom';
 import { useCollectionData } from 'react-firebase-hooks/firestore';
@@ -28,44 +28,17 @@ function ChatMessenger() {
 
 
 
-  const startChatWithUser = async (selectedUserId, currentUserUid) => {
+  const startChatWithUser = async (selectedUserId) => {
     try {
-      // Устанавливаем выбранного пользователя для чата
       setSelectedUser(selectedUserId);
-  
-      // Создаем запрос к коллекции сообщений для выбранных пользователей
-      const q = query(
-        collection(db, 'messages'),
-        where('senderId', 'in', [currentUserUid, selectedUserId]),
-        where('receiverId', 'in', [currentUserUid, selectedUserId]),
-        orderBy('createdAt')
-      );
-  
-      // Получаем сообщения из базы данных Firebase
-      const querySnapshot = await getDocs(q);
-      const messages = [];
-      querySnapshot.forEach((doc) => {
-        // Добавляем данные каждого документа в массив сообщений
-        messages.push({
-          id: doc.id,
-          ...doc.data()
-        });
-      });
-  
-      // Устанавливаем полученные сообщения в состояние
-      value(messages);
     } catch (error) {
-      console.error('Error loading messages:', error);
+      console.error('Error starting chat:', error);
     }
   };
-  
-
 
   const sendMessage = async (e) => {
     e.preventDefault();
-  try{
-
-  
+    try {
       await addDoc(messagesRef, {
         senderId: user.uid,
         receiverId: selectedUser,
@@ -73,53 +46,39 @@ function ChatMessenger() {
         photoURL: user.photoURL,
         text: value,
         createdAt: serverTimestamp(),
-        
       });
       setValue('');
-    
-    
-  }catch(err){
-    console.log(err.message)
-  }
+      // Обновляем список сообщений после успешной отправки
+      fetchMessages();
+    } catch (err) {
+      console.log(err.message);
+    }
+  };
+
+  const fetchMessages = async () => {
+    if (!selectedUser) return;
+    try {
+      const q = query(
+        collection(db, 'messages'),
+        where('senderId', '==', user.uid),
+        where('receiverId', '==', selectedUser),
+        orderBy('createdAt')
+      );
+      const querySnapshot = await getDocs(q);
+      const messages = [];
+      querySnapshot.forEach((doc) => {
+        messages.push({ id: doc.id, ...doc.data() });
+      });
+      setData(messages);
+    } catch (error) {
+      console.error('Error loading messages:', error);
+    }
   };
 
 
   useEffect(() => {
-    const fetchMessages = async () => {
-      if (selectedUser && user?.uid) { // Убедитесь, что значения определены
-        try {
-          // Создаем запрос к коллекции сообщений для выбранного пользователя
-          const q = query(
-            collection(db, 'messages'),
-            where('senderId', 'in', [selectedUser, user?.uid]),
-            where('receiverId', 'in', [selectedUser, user?.uid]),
-            orderBy('createdAt')
-          );
-    
-          // Получаем данные из базы данных Firebase
-          const querySnapshot = await getDocs(q);
-    
-          // Преобразуем данные в массив сообщений
-          const messages = [];
-          querySnapshot.forEach((doc) => {
-            messages.push({ id: doc.id, ...doc.data() });
-          });
-    
-          // Устанавливаем полученные сообщения в состояние
-          setData(messages);
-        } catch (error) {
-          console.error('Error fetching messages:', error);
-        }
-      }
-    };
-    
-   
-  
     fetchMessages();
-  }, [selectedUser, user?.uid]);
-  
-  
-
+  }, [selectedUser]);
  
 
 
@@ -182,7 +141,7 @@ function ChatMessenger() {
               <div
               className="flex items-center justify-between hover:bg-gray-100 mt-2 border border-gray-300 rounded p-2 duration-300 ease-in-out"
               key={friend.id}
-              onClick={()=> startChatWithUser(friend.id)}
+              onClick={()=> startChatWithUser(friend.id, user.uid)}
             >
               <div className="flex items-center my-2 cursor-pointer">
                 <div className="flex items-center">
@@ -239,7 +198,7 @@ function ChatMessenger() {
                         
                         {data.map((message) => (
                           <div key={message.id}>
-                            <p className='ml-4 py-2 font-roboto font-medium text-sm text-gray-700 no-underline tracking-normal leading-none'>{message.text}</p>
+                            <p  className='ml-4 py-2 font-roboto font-medium text-sm text-gray-700 no-underline tracking-normal leading-none'>{message.text}</p>
                             {/* Дополнительная информация о сообщении, если это необходимо */}
                           </div>
                         ))}
