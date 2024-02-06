@@ -5,10 +5,15 @@ import { Tooltip, Avatar } from '@material-tailwind/react'
 import avatar from '../../assets/images/avatar.jpg'
 import remove from '../../assets/images/delete.png'
 import { AuthContext } from '../AppContext/AppContext'
-import { arrayRemove, collection, getDocs, query, where, updateDoc, doc, orderBy } from 'firebase/firestore';
+import { arrayRemove, collection, getDocs, query, where, updateDoc, doc, orderBy, serverTimestamp, setDoc, addDoc } from 'firebase/firestore';
 import { auth, db } from '../firebase/firebase';
 import { Link } from 'react-router-dom';
 import { useCollectionData } from 'react-firebase-hooks/firestore';
+import TextField from '@mui/material/TextField';
+import Button from '@mui/material/Button';
+
+
+
 
 function ChatMessenger() {
   const [input, setInput] = useState("");
@@ -16,28 +21,106 @@ function ChatMessenger() {
   const {user, userData} = useContext(AuthContext)
   const friendList = userData?.friends;
   
-
-
+  const [selectedUser, setSelectedUser] = useState(null);
+  const [value, setValue] = useState('')
   const messagesRef  = collection(db, 'messages')
-  const q = query(messagesRef, orderBy("timestamp", "desc"));
-  const [messages] = useCollectionData(q, {idField: 'id'})
+
+
+
+
+  const startChatWithUser = async (selectedUserId, currentUserUid) => {
+    try {
+      // Устанавливаем выбранного пользователя для чата
+      setSelectedUser(selectedUserId);
+  
+      // Создаем запрос к коллекции сообщений для выбранных пользователей
+      const q = query(
+        collection(db, 'messages'),
+        where('senderId', 'in', [currentUserUid, selectedUserId]),
+        where('receiverId', 'in', [currentUserUid, selectedUserId]),
+        orderBy('createdAt')
+      );
+  
+      // Получаем сообщения из базы данных Firebase
+      const querySnapshot = await getDocs(q);
+      const messages = [];
+      querySnapshot.forEach((doc) => {
+        // Добавляем данные каждого документа в массив сообщений
+        messages.push({
+          id: doc.id,
+          ...doc.data()
+        });
+      });
+  
+      // Устанавливаем полученные сообщения в состояние
+      value(messages);
+    } catch (error) {
+      console.error('Error loading messages:', error);
+    }
+  };
   
 
 
-  function ChatMessage(props) {
-    const { text, uid, photoURL } = props.message;
+  const sendMessage = async (e) => {
+    e.preventDefault();
+  try{
+
   
-    const messageClass = uid === auth.currentUser.uid ? 'sent' : 'received'
-  
-    return (<>
-      <div className={`message ${messageClass} `}>
-        <img src={photoURL || 'https://api.adorable.io/avatars/23/abott@adorable.png'} />
-        <p>{text}</p>
-      </div>
-    </>)
+      await addDoc(messagesRef, {
+        senderId: user.uid,
+        receiverId: selectedUser,
+        displayName: user.displayName,
+        photoURL: user.photoURL,
+        text: value,
+        createdAt: serverTimestamp(),
+        
+      });
+      setValue('');
+    
+    
+  }catch(err){
+    console.log(err.message)
   }
+  };
 
 
+  useEffect(() => {
+    const fetchMessages = async () => {
+      if (selectedUser && user?.uid) { // Убедитесь, что значения определены
+        try {
+          // Создаем запрос к коллекции сообщений для выбранного пользователя
+          const q = query(
+            collection(db, 'messages'),
+            where('senderId', 'in', [selectedUser, user?.uid]),
+            where('receiverId', 'in', [selectedUser, user?.uid]),
+            orderBy('createdAt')
+          );
+    
+          // Получаем данные из базы данных Firebase
+          const querySnapshot = await getDocs(q);
+    
+          // Преобразуем данные в массив сообщений
+          const messages = [];
+          querySnapshot.forEach((doc) => {
+            messages.push({ id: doc.id, ...doc.data() });
+          });
+    
+          // Устанавливаем полученные сообщения в состояние
+          setData(messages);
+        } catch (error) {
+          console.error('Error fetching messages:', error);
+        }
+      }
+    };
+    
+   
+  
+    fetchMessages();
+  }, [selectedUser, user?.uid]);
+  
+  
+
+ 
 
 
   // FRIENDS AND SEARCH
@@ -99,6 +182,7 @@ function ChatMessenger() {
               <div
               className="flex items-center justify-between hover:bg-gray-100 mt-2 border border-gray-300 rounded p-2 duration-300 ease-in-out"
               key={friend.id}
+              onClick={()=> startChatWithUser(friend.id)}
             >
               <div className="flex items-center my-2 cursor-pointer">
                 <div className="flex items-center">
@@ -141,7 +225,7 @@ function ChatMessenger() {
               <div className='w-80% mx-auto'>
               <div className='mb-4'>
                 <div className='flex flex-col py-4 mx-4 px-4 bg-white rounded-3xl'>
-                    <div className='flex items-center pb-4 ml-2'>
+                    {/* <div className='flex items-center pb-4 ml-2'>
                         <Avatar size='sm' variant='circular' alt='avatar' src={  userData?.photoURL } /> 
                         <div className='flex flex-col'>
                             <p className='ml-4 py-2 font-roboto font-medium text-sm text-gray-700 no-underline tracking-normal leading-none'>name</p>
@@ -149,17 +233,43 @@ function ChatMessenger() {
                             <p className='ml-4 font-roboto font-medium text-sm text-gray-700 no-underline tracking-normal leading-none'>Published: timestamp</p>
                         </div>
                  
-                    </div>
+                    </div> */}
+                    
+                       <div>
+                        
+                        {data.map((message) => (
+                          <div key={message.id}>
+                            <p className='ml-4 py-2 font-roboto font-medium text-sm text-gray-700 no-underline tracking-normal leading-none'>{message.text}</p>
+                            {/* Дополнительная информация о сообщении, если это необходимо */}
+                          </div>
+                        ))}
+                      </div>
+                      <div>
+
+                      </div>
+
+
                     <div className=''>
-                        <div className='ml-4 pb-[60%] font-roboto font-medium text-sm text-gray-700 no-underline tracking-normal leading-none'>
+                        {/* <div className='ml-4 pb-[60%] font-roboto font-medium text-sm text-gray-700 no-underline tracking-normal leading-none'>
                           
                           {messages && messages.map((msg) => 
                           <ChatMessage key={msg.id} message={msg} />)}
-                        </div>
+                        </div> */}
                       
                     </div>
                     <div className='flex justify-around items-center pt-4'>
-                       <input className='' />
+                      <TextField 
+                        value={value}
+                        fullWidth
+                        rowsMax={2} 
+                        variant={'outlined'}
+                        onChange={e => setValue(e.target.value)}
+                        />
+                    <Button onClick={sendMessage} variant={'outlined'}>
+                      Send
+                    </Button>
+                     
+            
                     </div>
                 </div>
                 </div>
